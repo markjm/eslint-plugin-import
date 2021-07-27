@@ -15,6 +15,8 @@ exports.CASE_SENSITIVE_FS = CASE_SENSITIVE_FS;
 
 const ERROR_NAME = 'EslintPluginImportResolveError';
 
+const SETTINGS_HASH_SYMBOL = Symbol("settings_hash");
+
 const fileExistsCache = new ModuleCache();
 
 // Polyfill Node's `Module.createRequireFromPath` if not present (added in Node v10.12.0)
@@ -90,7 +92,9 @@ function fullResolve(modulePath, sourceFile, settings) {
   if (coreSet.has(modulePath)) return { found: true, path: null };
 
   const sourceDir = path.dirname(sourceFile);
-  const cacheKey = sourceDir + hashObject(settings).digest('hex') + modulePath;
+
+  settings[SETTINGS_HASH_SYMBOL] = settings[SETTINGS_HASH_SYMBOL] || hashObject(settings).digest('hex');
+  const cacheKey = sourceDir + settings[SETTINGS_HASH_SYMBOL] + modulePath;
 
   const cacheSettings = ModuleCache.getSettings(settings);
 
